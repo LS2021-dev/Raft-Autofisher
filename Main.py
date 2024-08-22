@@ -43,13 +43,15 @@ def fish():  # Run The Auto Fisher - This Will Be Run as A Thread
         sleep(1)
 
 
-print("Auto Fisher Starting")
+trigger_key = KeyCode.from_char('l')
+
+
+print(f"Auto Fisher Starting, press {trigger_key} to toggle")
 print("Fishing:", False)
 running = False
 fisher = threading.Thread(target=fish)
 fisher.start()
 
-trigger_key = KeyCode.from_char('l')
 
 # Callback Function To Toggle Fisher
 def toggle(key):
