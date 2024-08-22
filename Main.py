@@ -4,6 +4,7 @@ from time import sleep
 import pyautogui as auto
 from PIL import ImageGrab
 from pynput import keyboard
+from pynput.keyboard import KeyCode
 
 
 def check_fishing():  # Captures Image, Returns True If Fishing Box Found
@@ -14,40 +15,48 @@ def check_fishing():  # Captures Image, Returns True If Fishing Box Found
     colors = capture.quantize(colors=2, method=2).getpalette()[:6]
 
     # Compare Them To The Fishing Box Colors
-    return colors == [228, 210, 178, 95, 56, 34]
+    return colors == [229, 211, 180, 85, 37, 8]
 
 
 def fish():  # Run The Auto Fisher - This Will Be Run as A Thread
     while True:
-        global stop_thread
-        while stop_thread:
-
-            if check_fishing():
-                # Catch Fish
-                auto.click()
-                sleep(0.5)
-
-                # Full Cast
-                auto.mouseDown()
-                sleep(1.7)
-                auto.mouseUp()
+        global running
+        while running:
+            # Full Cast before starting the loop
+            auto.mouseDown()
+            sleep(1.7)
+            auto.mouseUp()
             sleep(0.5)
+
+            while running:
+                if check_fishing():
+                    # Catch Fish
+                    auto.click()
+                    sleep(0.5)
+
+                    # Full Cast
+                    auto.mouseDown()
+                    sleep(1.7)
+                    auto.mouseUp()
+                    sleep(0.5)
+                sleep(0.5)
         sleep(1)
 
 
-print("Auto Fisher Starting, Press Right Alt To Toggle On/Off")
-stop_thread = True
+print("Auto Fisher Starting")
+print("Fishing:", False)
+running = False
 fisher = threading.Thread(target=fish)
 fisher.start()
 
+trigger_key = KeyCode.from_char('l')
 
 # Callback Function To Toggle Fisher
 def toggle(key):
-    if key == keyboard.Key.alt_r:
-        global stop_thread
-        print("callback triggered, Fishing is now: ", stop_thread)
-        stop_thread = not stop_thread
-
+    if key == trigger_key:
+        global running
+        print("Fishing:", not running)
+        running = not running
 
 # Blocking Keyboard Listener
 with keyboard.Listener(on_press=toggle) as listener:
